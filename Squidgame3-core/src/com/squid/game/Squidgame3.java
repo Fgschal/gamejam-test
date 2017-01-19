@@ -1,4 +1,4 @@
-package com.mysquid.game;
+package com.squid.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -39,7 +39,7 @@ import java.util.Arrays;
 // A main game class that uses LibGDX to display, which is the default for SquidLib, needs to extend ApplicationAdapter
 // or something related, like Game. Game adds features that SquidLib doesn't currently use, so ApplicationAdapter is
 // perfectly fine for these uses. what what
-public class squidGame2 extends ApplicationAdapter {
+public class Squidgame3 extends ApplicationAdapter {
     SpriteBatch batch;
     private RNG rng;
     private SquidLayers display;
@@ -147,6 +147,7 @@ public class squidGame2 extends ApplicationAdapter {
         //Coord is the type we use as a general 2D point, usually in a dungeon.
         //Because we know dungeons won't be huge, Coord is optimized for x and y values between -3 and 255, inclusive.
         cursor = Coord.get(-1, -1);
+        player = new CharacterEntity();
         //player is, here, just a Coord that stores his position. In a real game, you would probably have a class for
         //creatures, and possibly a subclass for the player.
         //player = dungeonGen.utility.randomCell(placement);
