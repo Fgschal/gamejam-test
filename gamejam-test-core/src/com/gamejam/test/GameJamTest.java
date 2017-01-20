@@ -1,4 +1,4 @@
-package com.squid.game;
+package com.gamejam.test;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -38,8 +38,8 @@ import java.util.Arrays;
 
 // A main game class that uses LibGDX to display, which is the default for SquidLib, needs to extend ApplicationAdapter
 // or something related, like Game. Game adds features that SquidLib doesn't currently use, so ApplicationAdapter is
-// perfectly fine for these uses. what what
-public class Squidgame3 extends ApplicationAdapter {
+// perfectly fine for these uses.
+public class GameJamTest extends ApplicationAdapter {
     SpriteBatch batch;
     private RNG rng;
     private SquidLayers display;
@@ -58,8 +58,7 @@ public class Squidgame3 extends ApplicationAdapter {
     private Color bgColor;
     private Stage stage;
     private DijkstraMap playerToCursor;
-    private Coord cursor;//, player;
-    private CharacterEntity player;
+    private Coord cursor, player;
     private ArrayList<Coord> toCursor;
     private ArrayList<Coord> awaitedMoves;
     private float secondsWithoutMoves;
@@ -147,11 +146,9 @@ public class Squidgame3 extends ApplicationAdapter {
         //Coord is the type we use as a general 2D point, usually in a dungeon.
         //Because we know dungeons won't be huge, Coord is optimized for x and y values between -3 and 255, inclusive.
         cursor = Coord.get(-1, -1);
-        player = new CharacterEntity();
         //player is, here, just a Coord that stores his position. In a real game, you would probably have a class for
         //creatures, and possibly a subclass for the player.
-        //player = dungeonGen.utility.randomCell(placement);
-        player.setPosition(dungeonGen.utility.randomCell(placement));
+        player = dungeonGen.utility.randomCell(placement);
         //This is used to allow clicks or taps to take the player to the desired area.
         toCursor = new ArrayList<Coord>(100);
         awaitedMoves = new ArrayList<Coord>(100);
@@ -300,7 +297,7 @@ public class Squidgame3 extends ApplicationAdapter {
                         cursor = Coord.get(screenX, screenY);
                         //This uses DijkstraMap.findPath to get a possibly long path from the current player position
                         //to the position the user clicked on.
-                        toCursor = playerToCursor.findPath(100, null, null, player.getPosition(), cursor);
+                        toCursor = playerToCursor.findPath(100, null, null, player, cursor);
                     }
                     awaitedMoves = new ArrayList<Coord>(toCursor);
                 }
@@ -323,7 +320,7 @@ public class Squidgame3 extends ApplicationAdapter {
                     return false;
                 }
                 cursor = Coord.get(screenX, screenY);
-                toCursor = playerToCursor.findPath(100, null, null, player.getPosition(), cursor);
+                toCursor = playerToCursor.findPath(100, null, null, player, cursor);
                 return false;
             }
         }));
@@ -342,11 +339,11 @@ public class Squidgame3 extends ApplicationAdapter {
      * @param ymod
      */
     private void move(int xmod, int ymod) {
-        int newX = player.getPosition().x + xmod, newY = player.getPosition().y + ymod;
+        int newX = player.x + xmod, newY = player.y + ymod;
         if (newX >= 0 && newY >= 0 && newX < gridWidth && newY < gridHeight
                 && bareDungeon[newX][newY] != '#')
         {
-            player.setPosition(player.getPosition().translate(xmod, ymod));
+            player = player.translate(xmod, ymod);
         }
         // loops through the text snippets displayed whenever the player moves
         langIndex = (langIndex + 1) % lang.length;
@@ -368,7 +365,7 @@ public class Squidgame3 extends ApplicationAdapter {
             display.highlight(pt.x, pt.y, 100);
         }
         //places the player as an '@' at his position in orange (6 is an index into SColor.LIMITED_PALETTE).
-        display.put(player.getPosition().x, player.getPosition().y, '@', 6);
+        display.put(player.x, player.y, '@', 6);
         // for clarity, you could replace the above line with the uncommented line below
         //display.put(player.x, player.y, '@', SColor.INTERNATIONAL_ORANGE);
         // since this is what 6 refers to, a color constant in a palette where 6 refers to this shade of orange.
@@ -380,7 +377,7 @@ public class Squidgame3 extends ApplicationAdapter {
         // The arrays we produced in create() are used here to provide a blank area behind text
         display.put(0, gridHeight + 1, spaces, languageFG, languageBG);
         for (int i = 0; i < 6; i++) {
-            //display.putString(2, gridHeight + i + 1, lang[(langIndex + i) % lang.length], 0, 1);
+            display.putString(2, gridHeight + i + 1, lang[(langIndex + i) % lang.length], 0, 1);
         }
     }
     @Override
@@ -402,7 +399,7 @@ public class Squidgame3 extends ApplicationAdapter {
                 secondsWithoutMoves = 0;
                 Coord m = awaitedMoves.remove(0);
                 toCursor.remove(0);
-                move(m.x - player.getPosition().x, m.y - player.getPosition().y);
+                move(m.x - player.x, m.y - player.y);
             }
         }
         // if we are waiting for the player's input and get input, process it.
